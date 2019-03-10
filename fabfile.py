@@ -95,7 +95,7 @@ def build_candidate(repo_path=REMOTE_E8_REPO_PATH):
 
 @parallel
 @allow_single(with_parallel=True)
-def run_tests(repo_path=REMOTE_E8_REPO_PATH, print_only=False, team):
+def run_tests(team, repo_path=REMOTE_E8_REPO_PATH, print_only=False):
     num_buckets = count_hosts_of_type()
     if team not in HOSTS[env.host]['team']:
         return
