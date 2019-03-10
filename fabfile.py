@@ -8,21 +8,13 @@ import humanfriendly
 import datetime
 
 from jira import JIRA
+from hosts import HOSTS
 
 env.user = 'yoni'
 LOGS_DIR_ON_SERVER='/home/yoni/integration/_{}_logs'
 REMOTE_E8_REPO_PATH = '/home/yoni/integration/'
-#CANDIDATE_BRANCH_NAME = 'yoni/team_y_2_1_2'
-#CANDIDATE_BRANCH_NAME = 'sds_dev'
 CANDIDATE_BRANCH_NAME = 'yoni/team_y_nightly'
-#CANDIDATE_BRANCH_NAME = 'master'
-HOSTS = {'taurus': {'type' : 'deploy',  'shared' : True},
-         'polaris': {'type' : 'deploy', 'shared' : True},
-         'saturn': {'type' : 'non-deploy', 'shared' : True},
-         'gemini': {'type' : 'non-deploy', 'shared' : True},
-         'leo': {'type' : 'non-deploy', 'shared' : True},
-         'aries': {'type' : 'non-deploy', 'shared' : True},
-}
+
 
 def allow_single(with_parallel):
     def decorator(f):
@@ -146,44 +138,11 @@ def build_candidate(repo_path=REMOTE_E8_REPO_PATH):
 
 @parallel
 @allow_single(with_parallel=True)
-def prepare_candidate_ts(candidate=CANDIDATE_BRANCH_NAME, path=REMOTE_E8_REPO_PATH):
-    formatted_script = reset_branch.format(os.path.join(path, 'touchstone'),
-                                           candidate,
-                                           candidate)
-    run('{}'.format(formatted_script))
-    # formatted_script = ts_install.format(REMOTE_E8_REPO_PATH+'touchstone')
-    # run('{}'.format(formatted_script))
-
-@parallel
-@allow_single(with_parallel=True)
-def prepare_candidate_e8(candidate=CANDIDATE_BRANCH_NAME, path=REMOTE_E8_REPO_PATH):
-    formatted_script = reset_branch.format(os.path.join(path, 'E8'),
-                                           candidate,
-                                           candidate)
-    run('{}'.format(formatted_script))
-
-
-@parallel
-@allow_single(with_parallel=True)
-def prepare_os(job=None):
-    formatted_script = intall_os.format(REMOTE_E8_REPO_PATH+'jin',
-                                        '' if job == None else '-j ' + job)
-    run('{}'.format(formatted_script))
-
-@parallel
-@allow_single(with_parallel=True)
-def verify_vft():
-    e8_vft = run('cat {}/version/version_for_touchstone'.format(REMOTE_E8_REPO_PATH+'E8'))
-    ts_vft = run('cat {}/version/version_for_touchstone'.format(REMOTE_E8_REPO_PATH+'touchstone'))
-    if (e8_vft != ts_vft):
-        print "BAD VFT E8 - {}, TS - {}".format(e8_vft, ts_vft)
-        raise Exception;
-    print "GREAT!!!!"
-
-@parallel
-@allow_single(with_parallel=True)
-def run_tests(repo_path=REMOTE_E8_REPO_PATH, print_only=False):
+def run_tests(repo_path=REMOTE_E8_REPO_PATH, print_only=False, team):
     num_buckets = count_hosts_of_type()
+    if team not in HOSTS[env.host]['team']:
+        return
+
     formatted_cmd = warmup_cmd.format(os.path.join(repo_path, 'touchstone'),
                                       '' if HOSTS[env.host]['type'] == 'deploy' else 'not',
                                       env.host,
@@ -321,7 +280,6 @@ def check_issues():
 def status(repo_path=REMOTE_E8_REPO_PATH):
     progress(check_know_issues=False, repo_path=repo_path)
 
-
 @allow_single(with_parallel=True)
 def magic(repo_path=REMOTE_E8_REPO_PATH):
     progress(check_know_issues=True, repo_path=repo_path)
@@ -335,24 +293,6 @@ def getntp():
 @roles("hosts")
 def summary():
     execute(magic)
-
-@allow_single(with_parallel=False)
-def test(a=6):
-    run('free -h')
-    print '{} is going to sleep'.format(env.host)
-    run('sleep 1')
-    print "done sleeping"
-    run('date')
-
-@runs_once
-def ex(a=5,b=3):
-    print HOSTS.keys()
-    print a
-    print b
-    execute(test, hosts=['gemini'])
-    execute(test, hosts=['polaris'])
-    now = datetime.datetime.now()
-    print "I'm done and it's already " + str(now)
 
 @roles("hosts")
 def running_qemus():

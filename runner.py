@@ -28,18 +28,6 @@ class style:
 
 LogEntry = namedtuple('LogEntry', ['email', 'hash', 'message'])
 
-class QuitException(Exception):
-    pass
-
-def _exit():
-    sys.exit()
-
-def nop():
-    return None
-
-def fab(cmd):
-    call(['fab'] + cmd.split())
-
 class IntegrationRunner(object):
     def __init__(self, conf):
         self._directory = conf['directory']
@@ -50,6 +38,7 @@ class IntegrationRunner(object):
         self._master_branch = conf['branches']['master']
         self._integ_branch = conf['branches']['integration']
         self._hosts = [h for h,v in HOSTS.iteritems() if conf['team'] in v['team']]
+        self._team = conf['team']
         self._integ_utils = IntegrationUtils(self._directory, self._hosts)
         self._build_server = conf['build_server']
 
@@ -149,36 +138,6 @@ class IntegrationRunner(object):
         self._prepare_repo_for_integration(self._ts_repo)
         self.show_candidates(self._tmp_branch)
 
-    def integrate_commits(repo, hash_list):
-        repo.fetch()
-        repo.checkout('alex/integrate')
-        repo.reset('--hard', 'origin/alex/integrate')
-        for h in hash_list:
-            repo.cherry_pick(h)
-
-    def rebase_from_master(repo, branch):
-        repo.fetch()
-        repo.checkout('-B', branch)
-        repo.reset('--hard', 'origin/' + branch)
-        repo.rebase('origin/master_2_5_0')
-
-    def _get_input(cases_dict):
-        while True:
-            print ""
-            input_str = ""
-            for key in cases_dict:
-                input_str += '{} - {}\n'.format(key, cases_dict[key][1])
-            print colored(style.BOLD + "what would you like to do next?" + style.BOLD)
-            next_move = raw_input(input_str)
-            while next_move == "":
-                next_move = raw_input("")
-            if next_move not in cases_dict.keys():
-                print colored("\"{}\" unknown option please try again".format(next_move), 'red')
-                return
-
-            os.system('clear')
-            return cases_dict[next_move][0]()
-
     def _get_integ_utils(self, directory, hosts):
         if not directory and not hosts:
             return self._integ_utils
@@ -208,13 +167,18 @@ class IntegrationRunner(object):
         integ = self._get_integ_utils(directory, hosts)
         integ.get_artifacts_of_errors()
 
+    @staticmethod
+    def fab(cmd):
+        call(['fab'] + cmd.split())
+
     def start_warmup(self):
         self.prepare_for_integration()
         print ""
         assert self.verify_vft(), "bad version for touchstone"
-        fab('-H {} build_candidate_single:repo_path={}'.format(
+        self.fab('-H {} build_candidate_single:repo_path={}'.format(
             self._build_server, self._directory))
-        fab('run_tests:repo_path={},print_only=False'.format(self._directory))
+        self.fab('run_tests:repo_path={},print_only=True,team={}'.format(
+            self._directory, self._team))
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Integration util')
