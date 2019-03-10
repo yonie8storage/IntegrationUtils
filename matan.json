@@ -1,0 +1,11 @@
+{
+    "directory": "/home/team_integrator",
+    "build_server": "libra",
+    "team": "team_null",
+    "branches": {
+         "master": "master_2_5_0",
+         "integration": "integrate_2_5_0",
+         "tested": "team_null",
+         "tmp": "team_null_next"
+    }
+}
