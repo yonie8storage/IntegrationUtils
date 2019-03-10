@@ -64,29 +64,6 @@ build_script = \
         popd
     """
 
-ts_install = \
-    """
-        set -x
-        set -e
-
-        pushd {}
-        sudo git clean -xdf
-        sudo tools/e8slash --install
-        popd
-    """
-
-reset_branch = \
-    """
-        set -x
-        set -e
-
-        pushd {}
-        git fetch
-        git checkout {}
-        git reset --hard origin/{}
-        popd
-    """
-
 warmup_cmd = \
     """
         set -x
@@ -103,26 +80,6 @@ test_cmd = \
 
         cd {}
         screen -S team_y-mytest -L -d -m sudo tools/e8slash run -vvv -k \"{}\" -l ../_{}_logs --default-test-timeout-secs 7200 --split-buckets {} --run-bucket {} --clean-after-test
-    """
-
-test_cmd_no_screen = \
-    """
-        set -x
-        set -e
-        cd {}
-        sudo tools/e8slash run -vvv -k {} -l ../_{}_bisect_logs --default-test-timeout-secs 7200 --clean-after-test
-    """
-
-
-intall_os = \
-    """
-        set -x
-        set -e
-        cd {}
-        git fetch
-        git checkout master
-        git reset --hard master
-        sudo ./tools/jin install os {}
     """
 
 @parallel
