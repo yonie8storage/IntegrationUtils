@@ -98,5 +98,5 @@ class IntegrationUtils(object):
             if errors:
                 print colored(style.UNDERLINE + host + style.END)
                 for error in errors:
-                    print os.path.join(session_dir, error)
+                    print os.path.join(hs[host][0], error)
 

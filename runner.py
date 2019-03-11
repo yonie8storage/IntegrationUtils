@@ -177,7 +177,7 @@ class IntegrationRunner(object):
         assert self.verify_vft(), "bad version for touchstone"
         self.fab('-H {} build_candidate_single:repo_path={}'.format(
             self._build_server, self._directory))
-        self.fab('run_tests:team={},repo_path={},print_only=False'.format(
+        self.fab('run_tests:team={},repo_path={}'.format(
             self._team, self._directory))
 
 def parse_args():
