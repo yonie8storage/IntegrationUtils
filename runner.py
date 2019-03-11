@@ -134,8 +134,11 @@ class IntegrationRunner(object):
         repo.push('-f', 'origin', self._tmp_branch)
 
     def prepare_for_integration(self):
+        print colored(style.BOLD + "Preparing branch {} on E8 ".format(self._tmp_branch) + style.BOLD, 'green')
         self._prepare_repo_for_integration(self._e8_repo)
+        print colored(style.BOLD + "Preparing branch {} on touchstone ".format(self._tmp_branch) + style.BOLD, 'green')
         self._prepare_repo_for_integration(self._ts_repo)
+        print colored(style.UNDERLINE + "\nCandidates".format(self._tmp_branch) + style.UNDERLINE, 'green')
         self.show_candidates(self._tmp_branch)
 
     def _get_integ_utils(self, directory, hosts):

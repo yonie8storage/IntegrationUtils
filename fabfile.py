@@ -70,7 +70,7 @@ warmup_cmd = \
         set -e
 
         cd {}
-        screen -S team_y-nightly -L -d -m sudo tools/e8slash run -vvv -k \"tag:integration_warmup and {} tag:deploy\" -l ../_{}_logs --default-test-timeout-secs 7200 --split-buckets {} --run-bucket {} --clean-after-test
+        screen -S {}-nightly -L -d -m sudo tools/e8slash run -vvv -k \"tag:integration_warmup and {} tag:deploy\" -l ../_{}_logs --default-test-timeout-secs 7200 --split-buckets {} --run-bucket {} --clean-after-test
     """
 
 test_cmd = \
@@ -101,6 +101,7 @@ def run_tests(team, repo_path=REMOTE_E8_REPO_PATH, print_only=False):
         return
 
     formatted_cmd = warmup_cmd.format(os.path.join(repo_path, 'touchstone'),
+                                      team,
                                       '' if HOSTS[env.host]['type'] == 'deploy' else 'not',
                                       env.host,
                                       num_buckets,
