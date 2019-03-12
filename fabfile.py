@@ -11,11 +11,7 @@ import waiting
 from jira import JIRA
 from hosts import HOSTS
 
-env.user = 'yoni'
-LOGS_DIR_ON_SERVER='/home/yoni/integration/_{}_logs'
-REMOTE_E8_REPO_PATH = '/home/yoni/integration/'
-CANDIDATE_BRANCH_NAME = 'yoni/team_y_nightly'
-
+LOGS_DIR_ON_SERVER='/home/{}/_{}_logs'
 
 def allow_single(with_parallel):
     def decorator(f):
@@ -85,7 +81,7 @@ test_cmd = \
 
 @parallel
 @allow_single(with_parallel=True)
-def build_candidate(repo_path=REMOTE_E8_REPO_PATH):
+def build_candidate(repo_path):
     formatted_script = build_script.format(os.path.join(repo_path, 'E8'),
                                            '' if HOSTS[env.host]['type'] == 'non-deploy' else 'hot_upgrade_targets full_disk_images')
     output = run('{}'.format(formatted_script))
@@ -96,7 +92,7 @@ def build_candidate(repo_path=REMOTE_E8_REPO_PATH):
 
 @parallel
 @allow_single(with_parallel=True)
-def run_tests(team, repo_path=REMOTE_E8_REPO_PATH, print_only=False):
+def run_tests(team, repo_path, print_only=False):
     num_buckets = count_hosts_of_type()
     if team not in HOSTS[env.host]['team']:
         return
@@ -113,7 +109,7 @@ def run_tests(team, repo_path=REMOTE_E8_REPO_PATH, print_only=False):
 
 @parallel
 @allow_single(with_parallel=True)
-def run_test(name, use_buckets=True,repo_path=REMOTE_E8_REPO_PATH):
+def run_test(name, repo_path, use_buckets=True):
     print "use_buckets = {}".format(use_buckets)
     if use_buckets == True:
         num_buckets = count_hosts()
@@ -132,7 +128,7 @@ def run_test(name, use_buckets=True,repo_path=REMOTE_E8_REPO_PATH):
     run('{}'.format(formatted_cmd), pty=False)
 
 @runs_once
-def start_warmup(branch_name=CANDIDATE_BRANCH_NAME):
+def start_warmup(branch_name):
     execute(partial(prepare_candidate_ts_single, branch_name), hosts=['gemini'])
     execute(partial(prepare_candidate_e8_single, branch_name), hosts=['gemini'])
     execute(verify_vft_single, hosts=['polaris'])
@@ -143,7 +139,7 @@ def start_warmup(branch_name=CANDIDATE_BRANCH_NAME):
 
 def _get_latest_data(logs_dir=LOGS_DIR_ON_SERVER):
     with hide('running', 'stdout', 'stderr', 'warnings'):
-        logs_dir_on_server = logs_dir.format(env.host)
+        logs_dir_on_server = logs_dir.format(env.user, env.host)
         latest_log = run('ls -tr {} | tail -n1'.format(logs_dir_on_server))
         session_log = 'session_{}-e8report.json'.format(latest_log)
         remote_log_dir = '{}/{}'.format(logs_dir_on_server, latest_log)
@@ -185,7 +181,7 @@ def _check_know_issues(errors):
 
 @parallel
 @roles("hosts")
-def artifacts(repo_path=REMOTE_E8_REPO_PATH):
+def artifacts(repo_path):
     try:
         remote_log_dir, data = _get_latest_data(repo_path + '/_{}_logs')
         if not data:
@@ -206,7 +202,7 @@ def artifacts(repo_path=REMOTE_E8_REPO_PATH):
 
 
 @allow_single(with_parallel=False)
-def progress(check_know_issues=True, repo_path=REMOTE_E8_REPO_PATH):
+def progress(repo_path, check_know_issues=True):
     try:
         remote_log_dir, data = _get_latest_data(repo_path + '/_{}_logs')
         if not data:
@@ -236,11 +232,11 @@ def check_issues():
 
 @parallel
 @allow_single(with_parallel=False)
-def status(repo_path=REMOTE_E8_REPO_PATH):
+def status(repo_path):
     progress(check_know_issues=False, repo_path=repo_path)
 
 @allow_single(with_parallel=True)
-def magic(repo_path=REMOTE_E8_REPO_PATH):
+def magic(repo_path):
     progress(check_know_issues=True, repo_path=repo_path)
     artifacts(repo_path)
 

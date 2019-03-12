@@ -2,6 +2,8 @@
     "directory": "/home/team_integrator",
     "build_server": "libra",
     "team": "team_null",
+    "user": "team_integrator",
+    "ssh_key": "/home/team_integrator/.ssh/id_rsa_qemu",
     "branches": {
          "master": "master_2_5_0",
          "integration": "integrate_2_5_0",

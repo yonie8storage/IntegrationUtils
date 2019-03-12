@@ -41,6 +41,8 @@ class IntegrationRunner(object):
         self._team = conf['team']
         self._integ_utils = IntegrationUtils(self._directory, self._hosts)
         self._build_server = conf['build_server']
+        self._user = conf['user']
+        self._ssh_key = conf['ssh_key']
 
     @staticmethod
     def git_log(repo, oldest_commit='HEAD~30', newest_commit='HEAD'):
@@ -170,9 +172,8 @@ class IntegrationRunner(object):
         integ = self._get_integ_utils(directory, hosts)
         integ.get_artifacts_of_errors()
 
-    @staticmethod
-    def fab(cmd):
-        call(['fab'] + cmd.split())
+    def fab(self, cmd):
+        call(['fab','-u', self._user, '-i', self._ssh_key] + cmd.split())
 
     def start_warmup(self):
         self.prepare_for_integration()
@@ -184,7 +185,7 @@ class IntegrationRunner(object):
             self._team, self._directory))
 
     def stop_warmup(self):
-        self.fab('stop_run:{},{}'.format(self._team, self._directory))
+        self.fab('stop_run:team={},directory={}'.format(self._team, self._directory))
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Integration util')
