@@ -183,6 +183,9 @@ class IntegrationRunner(object):
         self.fab('run_tests:team={},repo_path={}'.format(
             self._team, self._directory))
 
+    def stop_warmup(self):
+        self.fab('stop_run:{},{}'.format(self._team, self._directory))
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Integration util')
     parser.add_argument('-f', '--conf', help='json config file',

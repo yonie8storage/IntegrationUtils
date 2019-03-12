@@ -6,6 +6,7 @@ from collections import namedtuple
 import csv
 import humanfriendly
 import datetime
+import waiting
 
 from jira import JIRA
 from hosts import HOSTS
@@ -251,6 +252,31 @@ def getntp():
 @roles("hosts")
 def summary():
     execute(magic)
+
+@allow_single(with_parallel=True)
+def qemu_pids(directory):
+    pids = []
+    with hide('running', 'stdout', 'stderr', 'warnings'):
+        out = run('ps -ef | grep qemu-system-x86_64 | grep -v grep | grep {}'.
+                  format(directory)).split('\n')
+    for ps_entry in out:
+        if not ps_entry:
+            continue
+        pids.append(int(ps_entry.split()[1]))
+    return pids
+
+@allow_single(with_parallel=True)
+def stop_run(team, directory):
+    if team not in HOSTS[env.host]['team']:
+        return
+    pids = qemu_pids(directory)
+    for pid in pids:
+        run('sudo kill -9 {}'.format(pid))
+    waiting.wait(lambda: not qemu_pids(directory),
+                 timeout_seconds=60,
+                 waiting_for="all integration qemus to die")
+    run('screen -S {}-nightly -X quit'.format(team))
+
 
 @roles("hosts")
 def running_qemus():
