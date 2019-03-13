@@ -54,7 +54,7 @@ class IntegrationRunner(object):
     @staticmethod
     def print_log(repo, branch, depth=30):
         jira = JiraUtils(JIRA_URL, JIRA_USER, JIRA_PASSWORD)
-        log = git_log(repo, '{}~{}'.format(branch, depth), branch)
+        log = IntegrationRunner.git_log(repo, '{}~{}'.format(branch, depth), branch)
         longest_name = max([len(c.email.split('@')[0]) for c in log])
         width_str = '{{0: <{}}}'.format(longest_name)
         for commit in log:
@@ -128,18 +128,20 @@ class IntegrationRunner(object):
         print colored(style.BOLD + 'touchstone' + style.BOLD)
         self.print_candidates(self.integrating(self._ts_repo, branch))
 
-    def _prepare_repo_for_integration(self, repo):
+    def _prepare_repo_for_integration(self, repo, branch):
         repo.fetch()
         repo.checkout('-B', self._tmp_branch)
-        repo.reset('--hard', self.orig(self._branch))
+        repo.reset('--hard', self.orig(branch))
         repo.rebase(self.orig(self._master_branch))
         repo.push('-f', 'origin', self._tmp_branch)
 
-    def prepare_for_integration(self):
+    def prepare_for_integration(self, branch=None):
+        if not branch:
+            branch = self._branch
         print colored(style.BOLD + "Preparing branch {} on E8 ".format(self._tmp_branch) + style.BOLD, 'green')
-        self._prepare_repo_for_integration(self._e8_repo)
+        self._prepare_repo_for_integration(self._e8_repo, branch)
         print colored(style.BOLD + "Preparing branch {} on touchstone ".format(self._tmp_branch) + style.BOLD, 'green')
-        self._prepare_repo_for_integration(self._ts_repo)
+        self._prepare_repo_for_integration(self._ts_repo, branch)
         print colored(style.UNDERLINE + "\nCandidates".format(self._tmp_branch) + style.UNDERLINE, 'green')
         self.show_candidates(self._tmp_branch)
 
@@ -164,19 +166,22 @@ class IntegrationRunner(object):
         print colored(style.BOLD + 'version for touchtone {} matches!'.format(e8_vft) + style.BOLD, 'green')
         return True
 
-    def status(self, directory=None, hosts=None):
+    def status(self, directory=None, hosts=None, print_ok_session=True):
         integ = self._get_integ_utils(directory, hosts)
-        return integ.get_latest_results()
+        is_done = integ.get_latest_results()
+        return is_done
 
     def failed_tests(self, directory=None, hosts=None):
         integ = self._get_integ_utils(directory, hosts)
-        integ.get_artifacts_of_errors()
+        total_errors = integ.get_artifacts_of_errors()
+        if total_errors:
+            print colored(style.BOLD + "A total of {} tests failed".format(total_errors) + style.END, 'red')
 
     def fab(self, cmd):
         call(['fab','-u', self._user, '-i', self._ssh_key] + cmd.split())
 
-    def start_warmup(self):
-        self.prepare_for_integration()
+    def start_warmup(self, tested_branch=None):
+        self.prepare_for_integration(tested_branch)
         print ""
         assert self.verify_vft(), "bad version for touchstone"
         self.fab('-H {} build_candidate_single:repo_path={}'.format(

@@ -42,8 +42,7 @@ class IntegrationUtils(object):
         return hosts_session, session_dir
 
     @staticmethod
-    def _print_counters(session_data):
-        counters = session_data['counters']
+    def _print_counters(counters):
         if counters['ended'] == counters['filtered']:
             print colored(style.BOLD + "ended {}/{}".format(counters['ended'], counters['filtered']) + style.END)
         else:
@@ -64,20 +63,33 @@ class IntegrationUtils(object):
                 if is_done else 'still running'
         print('duration:'),
         print colored('{}'.format(dur_str), 'white' if is_done else 'yellow')
-        IntegrationUtils._print_counters(session_data)
+        counters = session_data['counters']
+        IntegrationUtils._print_counters(counters)
         print ""
-        return is_done
+
+        return is_done, counters
 
     def get_latest_results(self):
         hs, session_dir = self._get_latest_data()
-        print colored(style.BOLD + "Session summary: " + style.END, 'green')
+        print colored(style.BOLD + "Sessions information: " + style.END, 'green')
         print colored(style.BOLD + "===========================" + style.END, 'green')
         is_done = True
+        total_counters = {'filtered': 0, 'left': 0, 'ended': 0, 'succeed': 0,
+                          'error': 0, 'failure': 0, 'skipped': 0,
+                          'collected_tests': 0, 'interrupted': 0}
         for host in hs.iterkeys():
             print colored(style.UNDERLINE + host + style.END)
-            is_done = self._session_summary(hs[host][1]) and is_done
+            session_done, counters = self._session_summary(hs[host][1])
+            is_done = is_done and session_done
+            for k,v in counters.iteritems():
+                total_counters[k] += v
+
+        print colored(style.BOLD + "Session summary: " + style.END, 'green')
+        print colored(style.BOLD + "===========================" + style.END, 'green')
+        IntegrationUtils._print_counters(total_counters)
         if is_done:
             print colored(style.BOLD + "All runs are complete" + style.END, 'green')
+            print ""
         return is_done
 
     @staticmethod
@@ -91,12 +103,16 @@ class IntegrationUtils(object):
             error_dirs.append(test_artifacts_dir)
         return error_dirs
 
-    def get_artifacts_of_errors(self):
+    def get_artifacts_of_errors(self, silent=False):
         hs, session_dir = self._get_latest_data()
+        num_errors = 0
         for host in hs.iterkeys():
             errors = self._get_artifacts_of_errors(hs[host][1], hs[host][0])
             if errors:
+                num_errors += len(errors)
+                if silent:
+                    continue
                 print colored(style.UNDERLINE + host + style.END)
                 for error in errors:
                     print os.path.join(hs[host][0], error)
-
+        return num_errors
