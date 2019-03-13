@@ -1,11 +1,7 @@
 {
-    "directory": "/home/yoni/integration",
     "build_server": "polaris",
-    "team": "team_y",
     "branches": {
          "master": "master_2_5_0",
-         "integration": "integrate_2_5_0",
-         "tested": "team_y",
-         "tmp": "yoni/team_y_nightly"
+         "integration": "integrate_2_5_0"
     }
 }

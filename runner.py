@@ -30,18 +30,38 @@ LogEntry = namedtuple('LogEntry', ['email', 'hash', 'message'])
 
 class IntegrationRunner(object):
     def __init__(self, conf):
+        if not 'directory' in conf:
+            conf['directory'] = raw_input("Enter path where E8 and touchstone are found: ")
         self._directory = conf['directory']
+
+        if not 'user' in conf:
+            conf['user'] = raw_input("Enter user name: ")
+        self._user = conf['user']
+
+        if not 'team' in conf:
+            team_input = "None"
+            while team_input not in ['null', 'y']:
+                team_input = raw_input("Enter team [y or null]: ")
+            conf['team'] = 'team_' + team_input
+        self._team = conf['team']
+
         self._e8_repo = git.Git(os.path.join(self._directory, 'E8'))
         self._ts_repo = git.Git(os.path.join(self._directory, 'touchstone'))
+        if not 'tested' in conf['branches']:
+            conf['branches']['tested'] = self._team
         self._branch = conf['branches']['tested']
+
+        if not 'tmp' in conf['branches']:
+            conf['branches']['tmp'] = os.path.join(conf['user'],'tmp_integration')
         self._tmp_branch = conf['branches']['tmp']
         self._master_branch = conf['branches']['master']
         self._integ_branch = conf['branches']['integration']
         self._hosts = [h for h,v in HOSTS.iteritems() if conf['team'] in v['team']]
-        self._team = conf['team']
+
         self._integ_utils = IntegrationUtils(self._directory, self._hosts)
         self._build_server = conf['build_server']
-        self._user = conf['user']
+        if not 'ssh_key' in conf:
+            conf['ssh_key'] = '~/.ssh/id_rsa_qemu'
         self._ssh_key = conf['ssh_key']
 
     @staticmethod
@@ -194,8 +214,7 @@ class IntegrationRunner(object):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Integration util')
-    parser.add_argument('-f', '--conf', help='json config file',
-                        default='/home/yoni/integration/utils/conf.json')
+    parser.add_argument('-f', '--conf', help='json config file')
     return parser.parse_args()
 
 def main():
@@ -203,11 +222,18 @@ def main():
     os.system('clear')
     print colored('Welcome to the integration runner', 'green')
 
-    print 'Loading ' + args.conf
-    with open(args.conf, 'r') as conf_file:
+    if not args.conf:
+        pathname = os.path.dirname(sys.argv[0])
+        conf_path = os.path.join(os.path.abspath(pathname), 'conf.json')
+    else:
+        conf_path = args.conf
+    print 'Loading ' + conf_path
+    with open(conf_path, 'r') as conf_file:
         integration_conf = json.load(conf_file)
     ig = IntegrationRunner(integration_conf)
 
+    with open(conf_path, 'w') as fp:
+        json.dump(integration_conf, fp)
     import IPython; IPython.embed()
 
 if __name__ == '__main__':

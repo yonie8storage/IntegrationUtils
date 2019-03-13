@@ -2,6 +2,8 @@
     "directory": "/home/yoni/integration",
     "build_server": "polaris",
     "team": "team_y",
+    "user": "yoni",
+    "ssh_key": "~/.ssh/id_rsa_qemu",
     "branches": {
          "master": "master_2_5_0",
          "integration": "integrate_2_5_0",
