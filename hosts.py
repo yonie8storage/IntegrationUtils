@@ -8,13 +8,6 @@ HOSTS = {
          'gemini': {'type' : 'non-deploy', 'metadata': False, 'team': ['team_y']},
          'leo': {'type' : 'non-deploy', 'metadata': False, 'team': ['team_y']},
 
-         'trump': {'type' : 'deploy',  'metadata': False, 'team': ['team_null']},
-         'libra': {'type' : 'deploy', 'metadata': False, 'team': ['team_null']},
-         'pegasus': {'type' : 'non-deploy', 'metadata': False, 'team': ['team_null']},
-         'moon': {'type' : 'non-deploy', 'metadata': False, 'team': ['team_null']},
-         'ursa': {'type' : 'non-deploy', 'metadata': False, 'team': ['team_null']},
-         'pluto': {'type' : 'non-deploy', 'metadata': False, 'team': ['team_null']},
-
          'rhodes' :  {'type' : 'deploy', 'metadata': False, 'team': ['team_y', 'team_null']},
          'athens' : {'type' : 'non-deploy', 'metadata': True, 'team': ['team_y', 'team_null']},
          'corfu' : {'type' : 'non-deploy', 'metadata': True, 'team': ['team_y', 'team_null']},
@@ -33,5 +26,18 @@ HOSTS = {
          'milan' : {'type' : 'non-deploy', 'metadata': False, 'team': ['team_y', 'team_null']},
          'thebes' : {'type' : 'non-deploy', 'metadata': False, 'team': []},
          'bari' : {'type' : 'non-deploy', 'metadata': False, 'team': []},
+
+         'trump': {'type' : 'deploy',  'metadata': False, 'team': ['team_null']},
+         'libra': {'type' : 'deploy', 'metadata': False, 'team': ['team_null']},
+         'pegasus': {'type' : 'non-deploy', 'metadata': False, 'team': ['team_null']},
+         'moon': {'type' : 'non-deploy', 'metadata': False, 'team': ['team_null']},
+         'ursa': {'type' : 'non-deploy', 'metadata': False, 'team': ['team_null']},
+         'pluto': {'type' : 'non-deploy', 'metadata': False, 'team': ['team_null']},
+
+         'led' : {'type' : '', 'metadata' : True, 'team': ['physical']},
+         'kiss' : {'type' : '', 'metadata' : True, 'team': ['physical']},
+         'oasis' : {'type' : '', 'metadata' : True, 'team': ['physical']},
+         'ringo' : {'type' : '', 'metadata' : True, 'team': ['physical']},
+
 }
 
