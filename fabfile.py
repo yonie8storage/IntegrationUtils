@@ -42,7 +42,7 @@ JIRA_URL = 'https://e8storage.atlassian.net'
 JIRA_USER = 'jirabot'
 JIRA_PASSWORD = 'la93G!s6V'
 
-env.roledefs = {"hosts" : [h for h in HOSTS]}
+env.roledefs = {"hosts" : [h[0] for h in HOSTS.iteritems() if h[1]['type'] != 'physical']}
 env.warn_only = True
 
 ErrorEntry = namedtuple('ErrorEntry', 'testName comment artifacts issues')

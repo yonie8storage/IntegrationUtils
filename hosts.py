@@ -34,10 +34,10 @@ HOSTS = {
          'ursa': {'type' : 'non-deploy', 'metadata': False, 'team': ['team_null']},
          'pluto': {'type' : 'non-deploy', 'metadata': False, 'team': ['team_null']},
 
-         'led' : {'type' : '', 'metadata' : True, 'team': ['physical']},
-         'kiss' : {'type' : '', 'metadata' : True, 'team': ['physical']},
-         'oasis' : {'type' : '', 'metadata' : True, 'team': ['physical']},
-         'ringo' : {'type' : '', 'metadata' : True, 'team': ['physical']},
+         'led' : {'type' : 'physical', 'metadata' : True, 'team': ['physical']},
+         'kiss' : {'type' : 'physical', 'metadata' : True, 'team': ['physical']},
+         'oasis' : {'type' : 'physical', 'metadata' : True, 'team': ['']},
+         'ringo' : {'type' : 'physical', 'metadata' : True, 'team': ['physical']},
 
 }
 

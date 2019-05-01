@@ -177,9 +177,9 @@ class IntegrationRunner(object):
 
     def verify_vft(self):
         with open(os.path.join(self._directory, 'E8/version/version_for_touchstone'), 'r') as vft:
-            e8_vft = int(vft.read().split('\n')[0])
+            e8_vft = (vft.read().split('\n')[0])
         with open(os.path.join(self._directory, 'touchstone/version/version_for_touchstone'), 'r') as vft:
-            ts_vft = int(vft.read().split('\n')[0])
+            ts_vft = (vft.read().split('\n')[0])
         if (e8_vft != ts_vft):
             print colored(style.BOLD + "BAD version_for_touchstone E8 - {}, touchstone - {}".format(e8_vft, ts_vft) + style.BOLD, 'red')
             return False
