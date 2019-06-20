@@ -18,8 +18,9 @@ from jira import JIRA, JIRAError
 
 
 JIRA_URL = 'https://e8storage.atlassian.net'
-JIRA_USER = 'jirabot'
-JIRA_PASSWORD = 'la93G!s6V'
+JIRA_USER = 'jirabot@e8storage.com'
+# Password for browser login if needed: 'la93G!s6V'
+JIRA_TOKEN = 'Bn20J2d1i8lwSKyiiBRK54C0'  # For API access
 
 class style:
    BOLD = '\033[1m'
@@ -73,7 +74,7 @@ class IntegrationRunner(object):
 
     @staticmethod
     def print_log(repo, branch, depth=30):
-        jira = JiraUtils(JIRA_URL, JIRA_USER, JIRA_PASSWORD)
+        jira = JiraUtils(JIRA_URL, JIRA_USER, JIRA_TOKEN)
         log = IntegrationRunner.git_log(repo, '{}~{}'.format(branch, depth), branch)
         longest_name = max([len(c.email.split('@')[0]) for c in log])
         width_str = '{{0: <{}}}'.format(longest_name)
@@ -117,7 +118,7 @@ class IntegrationRunner(object):
 
         longest_name = max([len(c[0].email.split('@')[0]) for c in candidates])
         width_str = '{{0: <{}}}'.format(longest_name)
-        jira = JiraUtils(JIRA_URL, JIRA_USER, JIRA_PASSWORD)
+        jira = JiraUtils(JIRA_URL, JIRA_USER, JIRA_TOKEN)
         for c in candidates:
             if (c[1]):
                 print colored(style.BOLD + 'INTEGRATING    ' + style.BOLD, 'green'),
